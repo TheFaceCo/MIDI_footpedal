@@ -1,12 +1,14 @@
-/*
-   MIDIUSB_test.ino
+#include <BLEMIDI_Transport.h>
 
-   Created: 4/6/2015 10:47:08 AM
-   Author: gurbrinder grewal
-   Modified by Arduino LLC (2015)
-*/
+#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+//#include <hardware/BLEMIDI_ESP32.h>
+//#include <hardware/BLEMIDI_nRF52.h>
+//#include <hardware/BLEMIDI_ArduinoBLE.h>
 
-#include "MIDIUSB.h"
+BLEMIDI_CREATE_INSTANCE("BLE Expression", MIDI);
+
+unsigned long t0 = millis();
+bool isConnected = false;
 
 #define button1 A0
 #define button2 A1
@@ -61,103 +63,51 @@ byte lastbutton10State = 0;
 
 byte midichannel = 3;
 
-//unsigned long midiclockperiod = 20833; //120bpm in microseconds at 24pulses/quarternote
-//unsigned long midiclockflag = 0;
-//unsigned long microsbuffer = 0;
-//
-//bool midilooper = false;
 
 void controlChange(byte channel, byte control, byte value) {
-  midiEventPacket_t event = {0x0B, 0xB0 | channel, control, value};
-  MidiUSB.sendMIDI(event);
+  MIDI.sendControlChange(control, value, channel);  // note 60, velocity 127 on channel 1
 }
 
-//void sendclock(byte channel, byte control, byte value) {
-//  midiEventPacket_t event = {0x0B, 0xF8 | channel, control, value};
-//  MidiUSB.sendMIDI(event);
-//  MidiUSB.flush();
-//}
 
-// First parameter is the event type (0x0B = control change).
-// Second parameter is the event type, combined with the channel.
-// Third parameter is the control number number (0-119).
-// Fourth parameter is the control value (0-127).
-
-
-//void momentarytoggle(int buttonstate, int lastbuttonstate, int led, int channel, int CCnum) {
-//  if (buttonstate != lastbuttonstate) {
-//    // if the state has changed, increment the counter
-//    if (buttonstate == LOW) {
-//      // if the current state is LOW then the button went from off to on:
-//      if (digitalRead(led)) {
-//        //turn off output
-//        controlChange(channel, CCnum, 0); // Set the value of controller 10 on channel 0 to 65
-//        digitalWrite(led, LOW);
-//      }
-//      else {
-//        //turn on output
-//        controlChange(channel, CCnum, 127); // Set the value of controller 10 on channel 0 to 65
-//        digitalWrite(led, HIGH);
-//      }
-//    }
-//    else {
-//    }
-//    delay(50);
-//  }
-//}
-//
-//void changechannel(int buttonstate, int lastbuttonstate, int led, int channel, int CCnum) {
-//  if (buttonstate != lastbuttonstate) {
-//    // if the state has changed, increment the counter
-//    if (buttonstate == LOW) {
-//      // if the current state is LOW then the button went from off to on:
-//      if (digitalRead(led)) {
-//        //turn off output
-//        midichannel = 1; // Set the value of controller 10 on channel 0 to 65
-//        digitalWrite(led, LOW);
-//      }
-//      else {
-//        //turn on output
-//        midichannel = 2; // Set the value of controller 10 on channel 0 to 65
-//        digitalWrite(led, HIGH);
-//      }
-//    }
-//    else {
-//    }
-//    delay(50);
-//  }
-//}
-//
-//void momentarycommand(int buttonstate, int lastbuttonstate, int led, int channel, int CCnum) {
-//  if (buttonstate != lastbuttonstate) {
-//    // if the state has changed, increment the counter
-//    if (buttonstate == LOW) {
-//      // if the current state is LOW then the button went from off to on:
-//      controlChange(channel, CCnum, 127); // Set the value of controller 10 on channel 0 to 65
-//      delay(5);
-//      controlChange(channel, CCnum, 0); // Set the value of controller 10 on channel 0 to 65
-//    }
-//    delay(50);
-//  }
-//}
 
 void expression(byte buttonstate, byte lastbuttonstate, byte channel, byte CCnum) {
   if (buttonstate != lastbuttonstate) {
-    controlChange(channel, CCnum, buttonstate); // Send the value of the expression pedal to midi
+    controlChange(channel, CCnum, buttonstate);  // Send the value of the expression pedal to midi
   }
 }
 
 
 void setup() {
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  MIDI.begin();
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
+  BLEMIDI.setHandleConnected(OnConnected);
+  BLEMIDI.setHandleDisconnected(OnDisconnected);
+}
+
+// -----------------------------------------------------------------------------
+// Device connected
+// -----------------------------------------------------------------------------
+void OnConnected() {
+  isConnected = true;
+  digitalWrite(LED_BUILTIN, HIGH);
+}
+
+// -----------------------------------------------------------------------------
+// Device disconnected
+// -----------------------------------------------------------------------------
+void OnDisconnected() {
+  isConnected = false;
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 
-
-
 void loop() {
+
+
 
   button1State = analogRead(button1) / 8;
   Serial.print(button1State);
@@ -203,7 +153,6 @@ void loop() {
   expression(button9State, lastbutton9State, midichannel, button9CC);
   expression(button10State, lastbutton10State, midichannel, button10CC);
 
-  MidiUSB.flush();
 
   lastbutton1State = button1State;
   lastbutton2State = button2State;
