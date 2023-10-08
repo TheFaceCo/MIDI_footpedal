@@ -61,7 +61,7 @@ byte lastbutton9State = 0;
 byte lastbutton10State = 0;
 
 
-byte midichannel = 3;
+byte midichannel = 4;
 
 
 void controlChange(byte channel, byte control, byte value) {
@@ -83,6 +83,19 @@ void setup() {
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
+
+  pinMode(button1,INPUT);
+  pinMode(button2,INPUT);
+  pinMode(button3,INPUT);
+  pinMode(button4,INPUT);
+  pinMode(button5,INPUT);
+  pinMode(button6,INPUT);
+  pinMode(button7,INPUT);
+  pinMode(button8,INPUT);
+  pinMode(button9,INPUT);
+  pinMode(button10,INPUT);
+  pinMode(button11,INPUT);
+  pinMode(button12,INPUT);
 
   BLEMIDI.setHandleConnected(OnConnected);
   BLEMIDI.setHandleDisconnected(OnDisconnected);
