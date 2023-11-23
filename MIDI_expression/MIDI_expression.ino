@@ -10,55 +10,72 @@ BLEMIDI_CREATE_INSTANCE("BLE Expression", MIDI);
 unsigned long t0 = millis();
 bool isConnected = false;
 
-#define button1 A0
-#define button2 A1
-#define button3 A2
-#define button4 A3
-#define button5 A4
-#define button6 A5
-#define button7 A6
-#define button8 A7
-#define button9 A8
-#define button10 A9
-#define button11 A10
-#define button12 A11
+#define enablePin D6
+#define s2 D5
+#define s3 D4
+#define s0 D3
+#define s1 D2
 
+#define expanderIO A0
+#define jack1 A1
+#define jack2 A2
 
-#define button1CC 41
-#define button2CC 42
-#define button3CC 43
-#define button4CC 44
-#define button5CC 45
-#define button6CC 46
-#define button7CC 47
-#define button8CC 48
-#define button9CC 49
-#define button10CC 50
+#define pot1CC 41
+#define pot2CC 42
+#define pot3CC 43
+#define pot4CC 44
+#define pot5CC 45
+#define pot6CC 46
+#define pot7CC 47
+#define pot8CC 48
+#define pot9CC 49
+#define pot10CC 50
+#define pot11CC 51
+#define pot12CC 52
+#define pot13CC 53
+#define pot14CC 54
+#define pot15CC 55
+#define jack1CC 56
+#define jack2CC 57
 
-byte button1State = 0;
-byte button2State = 0;
-byte button3State = 0;
-byte button4State = 0;
-byte button5State = 0;
-byte button6State = 0;
-byte button7State = 0;
-byte button8State = 0;
-byte button9State = 0;
-byte button10State = 0;
+byte pot1state = 0;
+byte pot2State = 0;
+byte pot3state = 0;
+byte pot4state = 0;
+byte pot5state = 0;
+byte pot6state = 0;
+byte pot7state = 0;
+byte pot8state = 0;
+byte pot9state = 0;
+byte pot10state = 0;
+byte pot11state = 0;
+byte pot12state = 0;
+byte pot13state = 0;
+byte pot14state = 0;
+byte pot15state = 0;
+byte jack1state = 0;
+byte jack2state = 0;
 
 float linear1 = 0;
 float linear2 = 0;
 
-byte lastbutton1State = 0;
-byte lastbutton2State = 0;
-byte lastbutton3State = 0;
-byte lastbutton4State = 0;
-byte lastbutton5State = 0;
-byte lastbutton6State = 0;
-byte lastbutton7State = 0;
-byte lastbutton8State = 0;
-byte lastbutton9State = 0;
-byte lastbutton10State = 0;
+byte lastpot1state = 0;
+byte lastpot2state = 0;
+byte lastpot3state = 0;
+byte lastpot4state = 0;
+byte lastpot5state = 0;
+byte lastpot6state = 0;
+byte lastpot7state = 0;
+byte lastpot8state = 0;
+byte lastpot9state = 0;
+byte lastpot10state = 0;
+byte lastpot11state = 0;
+byte lastpot12state = 0;
+byte lastpot13state = 0;
+byte lastpot14state = 0;
+byte lastpot15state = 0;
+byte lastjack1state = 0;
+byte lastjack2state = 0;
 
 
 byte midichannel = 4;
@@ -84,18 +101,16 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
-  pinMode(button1,INPUT);
-  pinMode(button2,INPUT);
-  pinMode(button3,INPUT);
-  pinMode(button4,INPUT);
-  pinMode(button5,INPUT);
-  pinMode(button6,INPUT);
-  pinMode(button7,INPUT);
-  pinMode(button8,INPUT);
-  pinMode(button9,INPUT);
-  pinMode(button10,INPUT);
-  pinMode(button11,INPUT);
-  pinMode(button12,INPUT);
+  pinMode(expanderIO,INPUT);
+  pinMode(s0,OUTPUT);
+  pinMode(s1,OUTPUT);
+  pinMode(s2,OUTPUT);
+  pinMode(s3,OUTPUT);
+
+  digitalWrite(s0,HIGH);
+  digitalWrite(s1,HIGH);
+  digitalWrite(s2,HIGH);
+  digitalWrite(s3,HIGH);
 
   BLEMIDI.setHandleConnected(OnConnected);
   BLEMIDI.setHandleDisconnected(OnDisconnected);
@@ -122,61 +137,17 @@ void loop() {
 
 
 
-  button1State = analogRead(button1) / 8;
-  Serial.print(button1State);
+  pot4state = analogRead(expanderIO) / 32;
+  Serial.print(pot4state);
   Serial.print(" | ");
-  button2State = analogRead(button2) / 8;
-  Serial.print(button2State);
-  Serial.print(" | ");
-  button3State = analogRead(button3) / 8;
-  Serial.print(button3State);
-  Serial.print(" | ");
-  button4State = analogRead(button4) / 8;
-  Serial.print(button4State);
-  Serial.print(" | ");
-  button5State = analogRead(button5) / 8;
-  Serial.print(button5State);
-  Serial.print(" | ");
-  button6State = analogRead(button6) / 8;
-  Serial.print(button6State);
-  Serial.print(" | ");
-  button7State = analogRead(button7) / 8;
-  Serial.print(button7State);
-  Serial.print(" | ");
-  button8State = analogRead(button8) / 8;
-  Serial.print(button8State);
-  Serial.print(" | ");
-  button9State = analogRead(button9) / 8;
-  Serial.print(button9State);
-  Serial.print(" | ");
-  button10State = analogRead(button10) / 8;
-  Serial.println(button10State);
+  jack1state = analogRead(jack1) / 32;
+  Serial.println(jack1state);
 
+  expression(pot4state, lastpot4state, midichannel, pot4CC);
+  expression(jack1state, lastjack1state, midichannel, jack1CC);
 
-
-
-  expression(button1State, lastbutton1State, midichannel, button1CC);
-  expression(button2State, lastbutton2State, midichannel, button2CC);
-  expression(button3State, lastbutton3State, midichannel, button3CC);
-  expression(button4State, lastbutton4State, midichannel, button4CC);
-  expression(button5State, lastbutton5State, midichannel, button5CC);
-  expression(button6State, lastbutton6State, midichannel, button6CC);
-  expression(button7State, lastbutton7State, midichannel, button7CC);
-  expression(button8State, lastbutton8State, midichannel, button8CC);
-  expression(button9State, lastbutton9State, midichannel, button9CC);
-  expression(button10State, lastbutton10State, midichannel, button10CC);
-
-
-  lastbutton1State = button1State;
-  lastbutton2State = button2State;
-  lastbutton3State = button3State;
-  lastbutton4State = button4State;
-  lastbutton5State = button5State;
-  lastbutton6State = button6State;
-  lastbutton7State = button7State;
-  lastbutton8State = button8State;
-  lastbutton9State = button9State;
-  lastbutton10State = button10State;
+  lastpot4state = pot4state;
+  lastjack1state = jack1state;
 
   delay(10);
 }
